@@ -132,7 +132,7 @@
  /Users/harris/Library/Arduino15/packages/esp32/hardware/esp32/2.0.11/tools/sdk/esp32/include/esp_hw_support/include/soc/esp32/spiram.h \
  /Users/harris/Library/Arduino15/packages/esp32/hardware/esp32/2.0.11/cores/esp32/io_pin_remap.h \
  /Users/harris/Library/Arduino15/packages/esp32/hardware/esp32/2.0.11/cores/esp32/Arduino.h \
- /Users/harris/Documents/Arduino/libraries/Adafruit_PWM_Servo_Driver_Library/Adafruit_PWMServoDriver.h \
- /Users/harris/Documents/Arduino/libraries/Adafruit_BusIO/Adafruit_I2CDevice.h \
  /Users/harris/Library/Arduino15/packages/esp32/hardware/esp32/2.0.11/libraries/Wire/src/Wire.h \
- /Users/harris/Library/Arduino15/packages/esp32/hardware/esp32/2.0.11/cores/esp32/esp32-hal.h
+ /Users/harris/Library/Arduino15/packages/esp32/hardware/esp32/2.0.11/cores/esp32/esp32-hal.h \
+ /Users/harris/Documents/Arduino/libraries/Adafruit_PWM_Servo_Driver_Library/Adafruit_PWMServoDriver.h \
+ /Users/harris/Documents/Arduino/libraries/Adafruit_BusIO/Adafruit_I2CDevice.h

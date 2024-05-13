@@ -1,8 +1,3 @@
-#include <Adafruit_PWMServoDriver.h>
-
-#include <Adafruit_PWMServoDriver.h>
-
-
  /*
  * Original library sourse: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
  * 
@@ -54,7 +49,6 @@ or make donation using PayPal http://robojax.com/L/?id=64
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <Wire.h>
-
 #include <Adafruit_PWMServoDriver.h>
 
 // called this way, it uses the default address 0x40
@@ -95,7 +89,6 @@ void setup() {
   //yield();
 }
 
-// the code inside loop() has been updated by Robojax
 void loop() {
   // for (int angle=0; angle<181; angle+=10){
   //   for (int i=0; i<1; i++)
@@ -105,17 +98,38 @@ void loop() {
   //       board1.setPWM(i, 0, angleToPulse(angle) );
   //     }
   // }
-  board1.setPWM(0, 0, 250);
-  delay(300);
-  board1.setPWM(1, 0, 250);
-  // delay(100);
-  board1.setPWM(0, 0, 300);
-  delay(300);
-  board1.setPWM(1, 0, 350);
-  delay(500);
-  board1.setPWM(1, 0, 300);
+
   // Serial.println("yo ");
   // robojax PCA9865 16 channel Servo control
-  delay(300);
+  // board1.setPWM(0, 0, 200);
+  // delay(1000);
+
+  // Find sensible pulse width range in ticks
+  // for (int ticks = 0; ticks < 4000; ticks += 100) {
+  //   board1.setPWM(0, 0, ticks);
+  //   Serial.println(ticks);
+  //   delay(1000);
+  // }
+  
+  // Fine tune in ticks
+  // for (int ticks = 1000; ticks < 1260; ticks += 10) {
+  //   board1.setPWM(0, 0, ticks);
+  //   Serial.println(ticks);
+  //   delay(1000);
+  // }
+
+  // Find sensible pulse width range in ms
+  for (int ms = 0; ms < 4000; ms += 100) {
+    board1.writeMicroseconds(0, ms);
+    Serial.println(ms);
+    delay(1000);
+  }
+  
+  // Fine tune in ms
+  //for (int ms = 1000; ms < 1260; ms += 10) {
+  //  board1.writeMicroseconds(0, ms);
+  //  Serial.println(ms);
+  //  delay(1000);
+  //}
 }
 

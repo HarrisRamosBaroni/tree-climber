@@ -1,9 +1,4 @@
 # 1 "/Users/harris/Documents/y1/final_project/pca_test/pca_test.ino"
-# 2 "/Users/harris/Documents/y1/final_project/pca_test/pca_test.ino" 2
-
-# 4 "/Users/harris/Documents/y1/final_project/pca_test/pca_test.ino" 2
-
-
  /*
  * Original library sourse: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
  * 
@@ -54,9 +49,9 @@ or make donation using PayPal http://robojax.com/L/?id=64
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-# 57 "/Users/harris/Documents/y1/final_project/pca_test/pca_test.ino" 2
+# 52 "/Users/harris/Documents/y1/final_project/pca_test/pca_test.ino" 2
 
-# 59 "/Users/harris/Documents/y1/final_project/pca_test/pca_test.ino" 2
+# 54 "/Users/harris/Documents/y1/final_project/pca_test/pca_test.ino" 2
 
 // called this way, it uses the default address 0x40
 Adafruit_PWMServoDriver board1 = Adafruit_PWMServoDriver(0x40);
@@ -79,7 +74,7 @@ int servoNumber = 0;
  * written by Ahmad Nejrabi for Robojax, Robojax.com
  */
 int angleToPulse(int ang){
-   int pulse = map(ang,0, 180, 205 /*200//125 // this is the 'minimum' pulse length count (out of 4096)*/,410 /*575 // this is the 'maximum' pulse length count (out of 4096)*/);// map angle of 0 to 180 to Servo min and Servo max 
+   int pulse = map(ang,0, 180, 205 /* = (1ms/cycle)/(1s/50Hz * 1000 ms/s) * 4096 ticks/cycle   //200//125 // this is the 'minimum' pulse length count (out of 4096)*/,410 /* = (2ms/cycle)/(1s/50Hz * 1000 ms/s) * 4096 ticks/cycle   //575 // this is the 'maximum' pulse length count (out of 4096)*/);// map angle of 0 to 180 to Servo min and Servo max 
    Serial.print("Angle: ");Serial.print(ang);
    Serial.print(" pulse: ");Serial.println(pulse);
    return pulse;
@@ -106,16 +101,38 @@ void loop() {
   //       board1.setPWM(i, 0, angleToPulse(angle) );
   //     }
   // }
-  board1.setPWM(0, 0, 250);
-  delay(300);
-  board1.setPWM(1, 0, 250);
-  // delay(100);
-  board1.setPWM(0, 0, 300);
-  delay(300);
-  board1.setPWM(1, 0, 350);
-  delay(500);
-  board1.setPWM(1, 0, 300);
+
   // Serial.println("yo ");
   // robojax PCA9865 16 channel Servo control
-  delay(300);
+  // board1.setPWM(0, 0, 4000);
+  // delay(1000);
+  // board1.setPWM(0, 0, 0);
+  // delay(1000);
+
+  // board1.setPWM(0, 0, 200);
+  // delay(1000);
+  // board1.setPWM(0, 0, 600);
+  // delay(1000);
+  // board1.setPWM(0, 0, 200);
+  // delay(1000);
+  // board1.setPWM(0, 0, 150);
+
+  // board1.writeMicroseconds(0, 2500);  
+  // delay(1000);
+  // board1.writeMicroseconds(0, 1500);
+  // delay(1000);
+
+  // find sensible pulse width range
+  for (int ms = 0; ms < 4000; ms += 100) {
+    board1.writeMicroseconds(0, ms);
+    Serial.println(ms);
+    delay(1000);
+  }
+
+  // fine tune
+  //for (int ms = 1000; ms < 1260; ms += 10) {
+  //  board1.writeMicroseconds(0, ms);
+  //  Serial.println(ms);
+  //  delay(1000);
+  //}
 }
