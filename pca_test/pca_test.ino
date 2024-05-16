@@ -119,17 +119,17 @@ void loop() {
   // }
 
   // Find sensible pulse width range in ms
-  for (int ms = 0; ms < 4000; ms += 100) {
-    board1.writeMicroseconds(0, ms);
-    Serial.println(ms);
-    delay(1000);
-  }
+  // for (int ms = 0; ms < 4000; ms += 100) {
+  //   board1.writeMicroseconds(0, ms);
+  //   Serial.println(ms);
+  //   delay(1000);
+  // }
   
   // Fine tune in ms
-  //for (int ms = 1000; ms < 1260; ms += 10) {
-  //  board1.writeMicroseconds(0, ms);
-  //  Serial.println(ms);
-  //  delay(1000);
-  //}
+  for (int ms = 1000; ms < 1260; ms += 10) {
+   board1.writeMicroseconds(0, ms);
+   Serial.println(ms);
+   delay(1000);
+  }
 }
 
