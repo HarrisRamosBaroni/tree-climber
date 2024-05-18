@@ -64,9 +64,11 @@ void vertical_move(int direction, int ms) {
 
 // TODO: Obtain the correct pulse width for horizontal movement
 void horizontal_move(int direction, int ms) {
-  // direction = 0 -> stop, direction = 1 -> left, direction = 2 -> right
-  // ms = time in milliseconds to move in the given direction
-  // ms = -1 -> move indefinitely in the given direction
+  /*
+    direction = 0 -> stop, direction = 1 -> left, direction = 2 -> right
+    ms = time in milliseconds to move in the given direction
+    ms = -1 -> move indefinitely in the given direction
+  */
  
   //int pulse = action ? 1650 : 1750; // deadzone at 1700
   int pulse = !direction ? WHEELDEADZONE : ((direction == 1) ? 1650 : 1750); 
@@ -77,17 +79,21 @@ void horizontal_move(int direction, int ms) {
 }
 
 void init_noboru() {
-  // Initialise the robot noboru to grab the tree trunk.
-  // You have 10 seconds to grab the tree 
-  // trunk once both grippers are open
+  /*
+    Initialise the robot noboru to grab the tree trunk.
+    You have 10 seconds to grab the tree 
+    trunk once both grippers are open.
+  */
   gripper(BOTH_NUM, OPEN,  10000); // 10 seconds to open both grippers
-  gripper(BOTH_NUM, STOP,  5000); // 5 seconds still
+  gripper(BOTH_NUM, STOP,  5000);  // 5 seconds still
   gripper(BOTH_NUM, CLOSE, 10000); // 10 seconds to close both grippers
 }
 
 void stepup() {
-  // A single step climb up the tree
-  // Only activate after noboru is initialised
+  /*
+    A single step climb up the tree.
+    Only activate after noboru is initialised.
+  */
   gripper(TOP_NUM, OPEN,  5000);  
   gripper(TOP_NUM, STOP,  5000);
   vertical_move(DOWN, 8000);
@@ -100,24 +106,24 @@ void stepup() {
 }
 
 void stepdown() {
-  // A single step downwards on tree
+  // A single step downwards on tree.
   gripper(BOTTOM_NUM, OPEN,  5000);  
   gripper(BOTTOM_NUM, STOP,  5000);
-  vertical_move(UP, 8000);
+  vertical_move(DOWN, 8000);
   gripper(BOTTOM_NUM, CLOSE, 5000);
 
   gripper(TOP_NUM, OPEN,  5000);  
   gripper(TOP_NUM, STOP,  5000);
-  vertical_move(DOWN, 8000);
+  vertical_move(UP, 8000);
   gripper(TOP_NUM, CLOSE, 5000);
 }
 
 void scan() {
-  // Scan the tree for branches  
+  // Scan the tree for branches.
 }
 
 void avoid_branch() {
-  // Move the robot to avoid a branch
+  // Move the robot to avoid a branch.
   //scan()
   //horizontal_move(LEFT, 5000);
   //horizontal_move(RIGHT, 5000);
