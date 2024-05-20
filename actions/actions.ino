@@ -39,7 +39,7 @@ void gripper(int servo_num, int action, int ms) {
   */
 
   //int pulse = action ? 1650 : 1750; // deadzone at 1700
-  int pulse = !direction ? WINCHDEADZONE : ((direction == 1) ? (WINCHDEADZONE - 50) : (WINCHDEADZONE + 50)); 
+  int pulse = !action ? WINCHDEADZONE : ((action == 1) ? (WINCHDEADZONE - 50) : (WINCHDEADZONE + 50)); 
   if (servo_num == BOTH_NUM) {
     board1.writeMicroseconds(TOP_NUM, pulse);
     board1.writeMicroseconds(BOTTOM_NUM, pulse);
