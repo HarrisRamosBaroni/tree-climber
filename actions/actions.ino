@@ -18,7 +18,7 @@ Adafruit_PWMServoDriver board1 = Adafruit_PWMServoDriver(0x40);
 #define DOWN 2
 #define LEFT 1
 #define RIGHT 2
-#define WINCHDEADZONE 1700
+#define WINCHDEADZONE 1700 + 20
 #define RACKDEADZONE 1130
 #define WHEELDEADZONE 1700 // TODO: Find the correct deadzone for the wheels
 
@@ -39,12 +39,12 @@ void gripper(int servo_num, int action, int ms) {
   */
 
   //int pulse = action ? 1650 : 1750; // deadzone at 1700
-  int pulse = !direction ? WINCHDEADZONE : ((direction == 1) ? 1650 : 1750); 
+  int pulse = !direction ? WINCHDEADZONE : ((direction == 1) ? (WINCHDEADZONE - 50) : (WINCHDEADZONE + 50)); 
   if (servo_num == BOTH_NUM) {
-    board1.setPWM(TOP_NUM, 0, pulse);
-    board1.setPWM(BOTTOM_NUM, 0, pulse);
+    board1.writeMicroseconds(TOP_NUM, pulse);
+    board1.writeMicroseconds(BOTTOM_NUM, pulse);
   } else {
-    board1.setPWM(servo_num, 0, pulse);
+    board1.writeMicroseconds(servo_num, pulse);
   }
   delay(ms);
 }
@@ -57,8 +57,8 @@ void vertical_move(int direction, int ms) {
   */
  
   //float pulse = direction ? 1100 : 1160; // deadzone at 1130
-  int pulse = !direction ? RACKDEADZONE : ((direction == 1) ? 1100 : 1160); 
-  board1.setPWM(RACKNPIN_NUM, 0, pulse);
+  int pulse = !direction ? RACKDEADZONE : ((direction == 1) ? (RACKDEADZONE - 30) : (RACKDEADZONE + 30)); 
+  board1.writeMicroseconds(RACKNPIN_NUM, pulse);
   delay(ms);
 }
 
@@ -71,9 +71,9 @@ void horizontal_move(int direction, int ms) {
   */
  
   //int pulse = action ? 1650 : 1750; // deadzone at 1700
-  int pulse = !direction ? WHEELDEADZONE : ((direction == 1) ? 1650 : 1750); 
-  board1.setPWM(WHEEL1_NUM, 0, pulse);
-  board1.setPWM(WHEEL2_NUM, 0, pulse);
+  int pulse = !direction ? WHEELDEADZONE : ((direction == 1) ? (WHEELDEADZONE - 50) : (WHEELDEADZONE + 50)); 
+  board1.writeMicroseconds(WHEEL1_NUM, pulse);
+  board1.writeMicroseconds(WHEEL2_NUM, pulse);
   if (ms == -1) return;
   delay(ms);
 }
