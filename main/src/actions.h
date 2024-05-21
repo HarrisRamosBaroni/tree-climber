@@ -13,16 +13,16 @@ extern Adafruit_PWMServoDriver board1;
 #define BOTH_NUM -1
 #define WHEEL1_NUM 3
 #define WHEEL2_NUM 4
-#define STOP 0
-#define OPEN 1
-#define CLOSE 2
-#define UP 1
-#define DOWN 2
-#define LEFT 1
-#define RIGHT 2
-#define WINCHDEADZONE 1700
-#define RACKDEADZONE 1130
-#define WHEELDEADZONE 1700 // TODO: Find the correct deadzone for the wheels
+#define ACTION_STOP 0
+#define ACTION_OPEN 1
+#define ACTION_CLOSE 2
+#define DIR_UP 2
+#define DIR_DOWN 1
+#define DIR_LEFT 1
+#define DIR_RIGHT 2
+#define WINCHDEADZONE 1700 + 20
+#define RACKDEADZONE 1130 + 10
+#define WHEELDEADZONE 1685 
 
 void gripper(int servo_num, int action, int ms);
 void vertical_move(int direction, int ms);

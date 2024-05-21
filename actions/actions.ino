@@ -51,7 +51,6 @@ void gripper(int servo_num, int action, int ms) {
     delay(ms);
     board1.writeMicroseconds(servo_num, WINCHDEADZONE);
   }
-  
 }
 
 void vertical_move(int direction, int ms) {
@@ -61,7 +60,6 @@ void vertical_move(int direction, int ms) {
     direction = 2 -> bottom gripper moves down w.r.t top gripper
   */
  
-  //float pulse = direction ? 1100 : 1160; // deadzone at 1130
   int pulse = !direction ? RACKDEADZONE : ((direction == DIR_DOWN) ? (RACKDEADZONE - 50) : (RACKDEADZONE + 50)); 
   board1.writeMicroseconds(RACKNPIN_NUM, pulse);
   delay(ms);
@@ -76,8 +74,7 @@ void horizontal_move(int direction, int ms) {
     ms = -1 -> move indefinitely in the given direction
   */
  
-  //int pulse = action ? 1650 : 1750; // deadzone at 1700
-  int pulse = !direction ? WHEELDEADZONE : ((direction == 1) ? (WHEELDEADZONE - 100) : (WHEELDEADZONE + 100)); 
+  int pulse = !direction ? WHEELDEADZONE : ((direction == DIR_LEFT) ? (WHEELDEADZONE - 100) : (WHEELDEADZONE + 100)); 
   board1.writeMicroseconds(WHEEL1_NUM, pulse);
   board1.writeMicroseconds(WHEEL2_NUM, pulse);
   if (ms == -1) return;
@@ -89,7 +86,7 @@ void horizontal_move(int direction, int ms) {
 void init_noboru() {
   /*
     Initialise the robot noboru to grab the tree trunk.
-    You have 10 seconds to grab the tree 
+    You have 5 seconds to grab the tree 
     trunk once both grippers are open.
   */
   gripper(BOTH_NUM, ACTION_OPEN,  15000); // 15 seconds to open both grippers
@@ -103,12 +100,12 @@ void stepup() {
     Only activate after noboru is initialised.
   */
   gripper(TOP_NUM, ACTION_OPEN, 20000);  
-  gripper(TOP_NUM, ACTION_STOP, 5000);
+  gripper(TOP_NUM, ACTION_STOP, 5000); //get rid of this line?
   vertical_move(DIR_DOWN, 10000);
   gripper(TOP_NUM, ACTION_CLOSE, 20000);
 
   gripper(BOTTOM_NUM, ACTION_OPEN, 20000);  
-  gripper(BOTTOM_NUM, ACTION_STOP, 5000);
+  gripper(BOTTOM_NUM, ACTION_STOP, 5000); //get rid of this line?
   vertical_move(DIR_UP, 10000);
   gripper(BOTTOM_NUM, ACTION_CLOSE, 20000);
 }
@@ -116,12 +113,12 @@ void stepup() {
 void stepdown() {
   // A single step downwards on tree.
   gripper(BOTTOM_NUM, ACTION_OPEN, 20000);  
-  gripper(BOTTOM_NUM, ACTION_STOP, 5000);
+  gripper(BOTTOM_NUM, ACTION_STOP, 5000); //get rid of this line?
   vertical_move(DIR_DOWN, 10000);
   gripper(BOTTOM_NUM, ACTION_CLOSE, 20000);
 
   gripper(TOP_NUM, ACTION_OPEN,  20000);  
-  gripper(TOP_NUM, ACTION_STOP,  5000);
+  gripper(TOP_NUM, ACTION_STOP,  5000); //get rid of this line?
   vertical_move(DIR_UP, 10000);
   gripper(TOP_NUM, ACTION_CLOSE, 20000);
 }
