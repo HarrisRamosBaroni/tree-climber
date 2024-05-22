@@ -1,11 +1,21 @@
 #include "src/actions.h"
 #include <Bluepad32.h>
 
+#define BTN_Y 0x0008
+#define BTN_LFT_TRGR 0x0010
+#define BTN_RGHT_TRGR 0x0020
+#define BTN_A 0x0001
+#define BTN_B 0x0004
+#define BTN_X 0x0002
+#define BTN_JYSTK 0x0100
+
 ControllerPtr myControllers[BP32_MAX_GAMEPADS];
 Adafruit_PWMServoDriver board1 = Adafruit_PWMServoDriver(0x40);
 
-int process_running = 0;
-int cooldownms = 0;
+int action_executing = 0;
+int cooldownms = 10000;
+int action = -1;
+TaskHandle_t actionTask;
 
 // This callback gets called any time a new gamepad is connected.
 // Up to 4 gamepads can be connected at the same time.
@@ -65,79 +75,153 @@ void dumpGamepad(ControllerPtr ctl) {
     );
 }
 
+void executeAction(void *param) {
+    board1.begin();
+    board1.setPWMFreq(50); //(60);  // Analog servos run at ~60 Hz updates
+    // while (1){
+    //     switch (action) {
+    //         case 0:
+    //             gripper(TOP_NUM, ACTION_OPEN, cooldownms);
+    //             break;
+    //         case 1:
+    //             gripper(TOP_NUM, ACTION_CLOSE, cooldownms);
+    //             break;
+    //         case 2:
+    //             gripper(BOTTOM_NUM, ACTION_OPEN, cooldownms);
+    //             break;
+    //         case 3:
+    //             gripper(BOTTOM_NUM, ACTION_CLOSE, cooldownms);
+    //             break;
+    //         case 4:
+    //             vertical_move(DIR_UP, cooldownms);
+    //             break;
+    //         case 5:
+    //             vertical_move(DIR_DOWN, cooldownms);
+    //             break;
+    //         case 6:
+    //             horizontal_move(DIR_LEFT, cooldownms);
+    //             break;
+    //         case 7:
+    //             horizontal_move(DIR_RIGHT, cooldownms);
+    //             break;
+    //         case 8:
+    //             init_noboru();
+    //             break;
+    //         case 9:
+    //             stepup();
+    //             break;
+    //         case 10:
+    //             stepdown();
+    //             break;
+    //         case 11:
+    //             scan();
+    //             break;
+    //         case 12:
+    //             avoid_branch();
+    //             break;
+    //         default:
+    //             delay(2000);
+    //             break;
+    //     }
+    // }
+    while (1){
+        if (action != -1){
+            Serial.print("action beginning in core ");
+            Serial.println(xPortGetCoreID());
+            action_executing = 1;
+        }
+        switch (action){
+            case 0:
+                Serial.println("open top gripper in core 0");
+                gripper(TOP_NUM, ACTION_OPEN, cooldownms);
+                break;
+            case 6:
+                Serial.println("move robot left in core 0");
+                horizontal_move(DIR_LEFT, cooldownms);
+                break;
+            case 7:
+                Serial.println("move robot right in core 0");
+                horizontal_move(DIR_RIGHT, cooldownms);
+                break;
+            default:
+                Serial.print("default in core 0");
+                // delay(2000);
+                break;
+        }
+        if (action != -1){
+            Serial.println("action ended in core 0");
+            action_executing = 0;
+        }
+        // action = -1; // reset action after execution of current action
+        // delay(2000);
+        vTaskDelay(4000 / portTICK_PERIOD_MS);  // Yield control for 4000 ms
+    }
+}
+
 void processGamepad(ControllerPtr ctl) {
-    // Query controller data by getting the buttons() function.
-    //dumpGamepad(ctl);
+    if (!action_executing) {
+        int buttons_pressed = ctl->buttons();
+        // Query controller data by getting the buttons() function.
+        //dumpGamepad(ctl);
 
-    // Y button relates to top gripper
-    // press left trigger simultaneously to open gripper
-    // press right trigger simultaneously to close gripper
-    if (ctl->buttons() == 0x0018) {
-        Serial.println("open top gripper");
-        cooldownms = 10000;
-        gripper(TOP_NUM, OPEN, cooldownms);
-    } else if (ctl->buttons() == 0x0028) {
-        Serial.println("close top gripper");
-        cooldownms = 10000;
-        gripper(TOP_NUM, CLOSE, cooldownms);
-    }
-
-    // A button relates to bottom gripper
-    // press left trigger simultaneously to open gripper
-    // press right trigger simultaneously to close gripper
-    else if (ctl->buttons() == 0x0011) {
-        Serial.println("open bottom gripper");
-        cooldownms = 10000;
-        gripper(BOTTOM_NUM, OPEN, cooldownms);
-    } else if (ctl->buttons() == 0x0021) {
-        Serial.println("close bottom gripper");
-        cooldownms = 10000;
-        gripper(BOTTOM_NUM, CLOSE, cooldownms);
-    }
-
-    // B button relates to rack and pinion
-    // press left trigger simultaneously to move rack and pinion up
-    // press right trigger simultaneously to move rack and pinion down
-    else if (ctl->buttons() == 0x0014) {
-        Serial.println("move rack and pinion up");
-        cooldownms = 10000;
-        vertical_move(UP, cooldownms);
-    } else if (ctl->buttons() == 0x0024) {
-        Serial.println("move rack and pinion down");
-        cooldownms = 10000;
-        vertical_move(DOWN, cooldownms);
-    }
-
-    // X button relates to wheels
-    // press left trigger simultaneously to move robot left
-    // press right trigger simultaneously to move robot right
-    // or alternatively, move left joystick left or right
-    else if (ctl->buttons() == 0x0012 || ctl->axisX() < -200) {
-        Serial.println("move robot left");
-        cooldownms = 10000;
-        horizontal_move(LEFT, cooldownms);
-    } else if (ctl->buttons() == 0x0022 || ctl->axisX() > 200) {
-        Serial.println("move robot right");
-        cooldownms = 10000;
-        horizontal_move(RIGHT, cooldownms);
-    }
-
-    // Press joystick to initiate noboru
-    else if (ctl->buttons() == 0x0100) {
-        Serial.println("initiate noboru");
-        init_noboru();
-    }
-
-    // Press Y and joystick to step up
-    else if (ctl->buttons() == 0x0110) {
-        Serial.println("step up");
-        stepup();
-    }
-
-    // Press A and joystick to step down
-    else if (ctl->buttons() == 0x0120) {
-        Serial.println("step down");
-        stepdown();
+        // int joyX = ctl->axisX();
+        // if (joyX < -200) {
+        //     buttons_pressed = BTN_X + BTN_LFT_TRGR;
+        // } else if (joyX > 200) {
+        //     buttons_pressed = BTN_X + BTN_RGHT_TRGR;
+        // }
+        action_executing = 1;
+        switch (buttons_pressed) {
+            case BTN_Y + BTN_LFT_TRGR:
+                Serial.println("core 1 cmd: open top gripper");
+                action = 0;
+                break;
+            case BTN_Y + BTN_RGHT_TRGR:
+                Serial.println("core 1 cmd: close top gripper");
+                action = 1;
+                break;
+            case BTN_A + BTN_LFT_TRGR:
+                Serial.println("core 1 cmd: open bottom gripper");
+                action = 2;
+                break;
+            case BTN_A + BTN_RGHT_TRGR:
+                Serial.println("core 1 cmd: close bottom gripper");
+                action = 3;
+                break;
+            case BTN_B + BTN_LFT_TRGR:
+                Serial.println("core 1 cmd: move rack and pinion up");
+                action = 4;
+                break;
+            case BTN_B + BTN_RGHT_TRGR:
+                Serial.println("core 1 cmd: move rack and pinion down");
+                action = 5;
+                break;
+            case BTN_X + BTN_LFT_TRGR:
+                Serial.println("core 1 cmd: move robot left");
+                action = 6;
+                break;
+            case BTN_X + BTN_RGHT_TRGR:
+                Serial.println("core 1 cmd: move robot right");
+                action = 7;
+                break;
+            case BTN_JYSTK:
+                Serial.println("core 1 cmd: initiate noboru");
+                action = 8;
+                break;
+            case BTN_Y + BTN_JYSTK:
+                Serial.println("core 1 cmd: step up");
+                action = 9;
+                break;
+            case BTN_A + BTN_JYSTK:
+                Serial.println("core 1 cmd: step down");
+                action = 10;
+                break;
+            default:
+                Serial.println("default in core 1");
+                action = -1;
+                action_executing = 0;
+                break;
+        }
     }
 }
 
@@ -156,6 +240,7 @@ void processControllers() {
 // Arduino setup function. Runs in CPU 1
 void setup() {
     Serial.begin(115200);
+    //Serial.begin(9600);
     Serial.printf("Firmware: %s\n", BP32.firmwareVersion());
     const uint8_t* addr = BP32.localBdAddress();
     Serial.printf("BD Addr: %2X:%2X:%2X:%2X:%2X:%2X\n", addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
@@ -176,6 +261,9 @@ void setup() {
     // - Second one, which is a "virtual device", is a mouse.
     // By default, it is disabled.
     BP32.enableVirtualDevice(false);
+
+    // Core 0 task to execute the actions with PWM controller
+    xTaskCreatePinnedToCore(executeAction, "executeAction", 4096, NULL, 1, &actionTask, 0); 
 }
 
 // Arduino loop function. Runs in CPU 1.
@@ -192,6 +280,6 @@ void loop() {
     // Detailed info here:
     // https://stackoverflow.com/questions/66278271/task-watchdog-got-triggered-the-tasks-did-not-reset-the-watchdog-in-time
 
-    //     vTaskDelay(1);
+    vTaskDelay(1);
     delay(150);
 }
