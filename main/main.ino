@@ -1,5 +1,6 @@
 #include "src/actions.h"
 #include <Bluepad32.h>
+#include <Arduino.h>
 
 #define BTN_Y 0x0008
 #define BTN_LFT_TRGR 0x0010
@@ -8,12 +9,14 @@
 #define BTN_B 0x0004
 #define BTN_X 0x0002
 #define BTN_JYSTK 0x0100
+const int LED_PIN = 2; // Pin number for the built-in LED on the ESP32 board
 
 ControllerPtr myControllers[BP32_MAX_GAMEPADS];
 Adafruit_PWMServoDriver board1 = Adafruit_PWMServoDriver(0x40);
 
 int action_executing = 0;
 int cooldownms = 10000;
+int shortcooldownms = 3000;
 int action = -1;
 TaskHandle_t actionTask;
 
@@ -76,64 +79,43 @@ void dumpGamepad(ControllerPtr ctl) {
 }
 
 void executeAction(void *param) {
+    // Setup the PWM controller
     board1.begin();
     board1.setPWMFreq(50); //(60);  // Analog servos run at ~60 Hz updates
-    // while (1){
-    //     switch (action) {
-    //         case 0:
-    //             gripper(TOP_NUM, ACTION_OPEN, cooldownms);
-    //             break;
-    //         case 1:
-    //             gripper(TOP_NUM, ACTION_CLOSE, cooldownms);
-    //             break;
-    //         case 2:
-    //             gripper(BOTTOM_NUM, ACTION_OPEN, cooldownms);
-    //             break;
-    //         case 3:
-    //             gripper(BOTTOM_NUM, ACTION_CLOSE, cooldownms);
-    //             break;
-    //         case 4:
-    //             vertical_move(DIR_UP, cooldownms);
-    //             break;
-    //         case 5:
-    //             vertical_move(DIR_DOWN, cooldownms);
-    //             break;
-    //         case 6:
-    //             horizontal_move(DIR_LEFT, cooldownms);
-    //             break;
-    //         case 7:
-    //             horizontal_move(DIR_RIGHT, cooldownms);
-    //             break;
-    //         case 8:
-    //             init_noboru();
-    //             break;
-    //         case 9:
-    //             stepup();
-    //             break;
-    //         case 10:
-    //             stepdown();
-    //             break;
-    //         case 11:
-    //             scan();
-    //             break;
-    //         case 12:
-    //             avoid_branch();
-    //             break;
-    //         default:
-    //             delay(2000);
-    //             break;
-    //     }
-    // }
+    // Setup LED pin
+    pinMode(LED_PIN, OUTPUT); // Set the LED pin as an output
+
     while (1){
         if (action != -1){
             Serial.print("action beginning in core ");
             Serial.println(xPortGetCoreID());
             action_executing = 1;
+            digitalWrite(LED_PIN, HIGH); // Turn on the LED
         }
         switch (action){
             case 0:
                 Serial.println("open top gripper in core 0");
-                gripper(TOP_NUM, ACTION_OPEN, cooldownms);
+                gripper(TOP_NUM, ACTION_OPEN, shortcooldownms);
+                break;
+            case 1:
+                Serial.println("close top gripper in core 0");
+                gripper(TOP_NUM, ACTION_CLOSE, shortcooldownms);
+                break;
+            case 2:
+                Serial.println("open bottom gripper in core 0");
+                gripper(BOTTOM_NUM, ACTION_OPEN, shortcooldownms);
+                break;
+            case 3:
+                Serial.println("close bottom gripper in core 0");
+                gripper(BOTTOM_NUM, ACTION_CLOSE, shortcooldownms);
+                break;
+            case 4:
+                Serial.println("move rack and pinion up in core 0");
+                vertical_move(DIR_UP, cooldownms);
+                break;
+            case 5:
+                Serial.println("move rack and pinion down in core 0");
+                vertical_move(DIR_DOWN, cooldownms);
                 break;
             case 6:
                 Serial.println("move robot left in core 0");
@@ -143,14 +125,27 @@ void executeAction(void *param) {
                 Serial.println("move robot right in core 0");
                 horizontal_move(DIR_RIGHT, cooldownms);
                 break;
+            case 8:
+                Serial.println("initiate noboru in core 0");
+                init_noboru();
+                break;
+            case 9:
+                Serial.println("step up in core 0");
+                stepup();
+                break;
+            case 10:
+                Serial.println("step down in core 0");
+                stepdown();
+                break;
             default:
-                Serial.print("default in core 0");
+                Serial.println("default in core 0");
                 // delay(2000);
                 break;
         }
         if (action != -1){
             Serial.println("action ended in core 0");
             action_executing = 0;
+            digitalWrite(LED_PIN, LOW); // Turn off the LED
         }
         // action = -1; // reset action after execution of current action
         // delay(2000);
