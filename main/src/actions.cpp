@@ -68,27 +68,44 @@ void stepup() {
     Only activate after noboru is initialised.
   */
   gripper(TOP_NUM, ACTION_OPEN,  20000);  
-  gripper(TOP_NUM, ACTION_STOP,  5000); //get rid of this line?
-  vertical_move(DIR_DOWN, 10000);
+  // gripper(TOP_NUM, ACTION_STOP,  5000); //get rid of this line?
+  vertical_move(DIR_DOWN, 20000);
   gripper(TOP_NUM, ACTION_CLOSE, 20000);
 
   gripper(BOTTOM_NUM, ACTION_OPEN,  20000);  
-  gripper(BOTTOM_NUM, ACTION_STOP,  5000); //get rid of this line?
-  vertical_move(DIR_UP, 10000);
+  // gripper(BOTTOM_NUM, ACTION_STOP,  5000); //get rid of this line?
+  vertical_move(DIR_UP, 20000);
   gripper(BOTTOM_NUM, ACTION_CLOSE, 20000);
 }
 
 void stepdown() {
   // A single step downwards on tree.
   gripper(BOTTOM_NUM, ACTION_OPEN,  20000);  
-  gripper(BOTTOM_NUM, ACTION_STOP,  5000); //get rid of this line?
-  vertical_move(DIR_DOWN, 10000);
+  // gripper(BOTTOM_NUM, ACTION_STOP,  5000); //get rid of this line?
+  vertical_move(DIR_DOWN, 20000);
   gripper(BOTTOM_NUM, ACTION_CLOSE, 20000);
 
   gripper(TOP_NUM, ACTION_OPEN,  20000);  
   gripper(TOP_NUM, ACTION_STOP,  5000); //get rid of this line?
-  vertical_move(DIR_UP, 10000);
+  // vertical_move(DIR_UP, 20000);
   gripper(TOP_NUM, ACTION_CLOSE, 20000);
+}
+
+float get_distance() {
+  // Clear the trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  // Set the trigPin on HIGH state for 10 micro seconds to trigger the sensor
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  // Read the echoPin (returns the sound wave travel time in microseconds)
+  duration = pulseIn(echoPin, HIGH);
+  
+  // Calculate distance
+  distanceCm = duration * SOUND_SPEED/2;
+  return distanceCm;
 }
 
 void scan() {
@@ -100,4 +117,48 @@ void avoid_branch() {
   //scan()
   //horizontal_move(DIR_LEFT, 5000);
   //horizontal_move(DIR_RIGHT, 5000);
+}
+
+void climb() {
+  // Climb the tree (no branch avoidance)
+  // Must be called after init_noboru()
+  // Simply step up until the distance is less than 15cm
+
+  while (get_distance() > 15) {
+    stepup();
+    actions_taken[actions_taken_idx++] = 9; // 9 -> stepup. post increment index
+  }
+}
+
+void branch_climb() {
+  // Climb the tree while avoiding branches.
+  // init_noboru();
+  // while (get_distance() > 15) {
+  //   stepup();
+  //   avoid_branch();
+  // }
+}
+
+void descend() {
+  // Descend the tree.
+  // Retrace steps taken to climb the tree.
+  for (actions_taken_idx; actions_taken_idx >= 0; actions_taken_idx--) {
+    switch (actions_taken[actions_taken_idx]) {
+      case 6:
+          horizontal_move(DIR_LEFT, cooldownms);
+          break;
+      case 7:
+          horizontal_move(DIR_RIGHT, cooldownms);
+          break;
+      case 9:
+          stepup();
+          break;
+      case 10:
+          stepdown();
+          break;
+      default:
+          // delay(2000);
+          break;
+    }
+  }
 }
