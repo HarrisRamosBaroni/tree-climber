@@ -15,8 +15,6 @@ ControllerPtr myControllers[BP32_MAX_GAMEPADS];
 Adafruit_PWMServoDriver board1 = Adafruit_PWMServoDriver(0x40);
 
 int action_executing = 0;
-int cooldownms = 10000;
-int shortcooldownms = 3000;
 int action = -1;
 TaskHandle_t actionTask;
 
@@ -81,69 +79,79 @@ void dumpGamepad(ControllerPtr ctl) {
 void executeAction(void *param) {
     // Setup the PWM controller
     board1.begin();
-    board1.setPWMFreq(50); //(60);  // Analog servos run at ~60 Hz updates
+    board1.setPWMFreq(50); //(60);  // Analog servos run at ~50 Hz updates
     // Setup LED pin
     pinMode(LED_PIN, OUTPUT); // Set the LED pin as an output
 
     while (1){
         if (action != -1){
-            Serial.print("action beginning in core ");
-            Serial.println(xPortGetCoreID());
+            // Serial.print("action beginning in core ");
+            // Serial.println(xPortGetCoreID());
             action_executing = 1;
             digitalWrite(LED_PIN, HIGH); // Turn on the LED
+            // actions_taken[actions_taken_idx] = action;
+            // actions_taken_idx++;
         }
         switch (action){
             case 0:
-                Serial.println("open top gripper in core 0");
+                // Serial.println("open top gripper in core 0");
                 gripper(TOP_NUM, ACTION_OPEN, shortcooldownms);
                 break;
             case 1:
-                Serial.println("close top gripper in core 0");
+                // Serial.println("close top gripper in core 0");
                 gripper(TOP_NUM, ACTION_CLOSE, shortcooldownms);
                 break;
             case 2:
-                Serial.println("open bottom gripper in core 0");
+                // Serial.println("open bottom gripper in core 0");
                 gripper(BOTTOM_NUM, ACTION_OPEN, shortcooldownms);
                 break;
             case 3:
-                Serial.println("close bottom gripper in core 0");
+                // Serial.println("close bottom gripper in core 0");
                 gripper(BOTTOM_NUM, ACTION_CLOSE, shortcooldownms);
                 break;
             case 4:
-                Serial.println("move rack and pinion up in core 0");
+                // Serial.println("move rack and pinion up in core 0");
                 vertical_move(DIR_UP, cooldownms);
                 break;
             case 5:
-                Serial.println("move rack and pinion down in core 0");
+                // Serial.println("move rack and pinion down in core 0");
                 vertical_move(DIR_DOWN, cooldownms);
                 break;
             case 6:
-                Serial.println("move robot left in core 0");
+                // Serial.println("move robot left in core 0");
                 horizontal_move(DIR_LEFT, cooldownms);
                 break;
             case 7:
-                Serial.println("move robot right in core 0");
+                // Serial.println("move robot right in core 0");
                 horizontal_move(DIR_RIGHT, cooldownms);
                 break;
             case 8:
-                Serial.println("initiate noboru in core 0");
+                // Serial.println("initiate noboru in core 0");
                 init_noboru();
                 break;
             case 9:
-                Serial.println("step up in core 0");
+                // Serial.println("step up in core 0");
                 stepup();
                 break;
             case 10:
-                Serial.println("step down in core 0");
+                // Serial.println("step down in core 0");
                 stepdown();
                 break;
+            case 11:
+                // Serial.println("big both grab in core 0");
+                gripper(BOTH_NUM, ACTION_OPEN, cooldownms);
+                break;
+            case 12:
+                // Serial.println("big both ungrab in core 0");
+                gripper(BOTH_NUM, ACTION_CLOSE, cooldownms);
+                break;
             default:
-                Serial.println("default in core 0");
+                // Serial.println("default in core 0");
                 // delay(2000);
                 break;
         }
         if (action != -1){
-            Serial.println("action ended in core 0");
+            // Serial.println("action ended in core 0");
             action_executing = 0;
             digitalWrite(LED_PIN, LOW); // Turn off the LED
         }
@@ -168,51 +176,59 @@ void processGamepad(ControllerPtr ctl) {
         action_executing = 1;
         switch (buttons_pressed) {
             case BTN_Y + BTN_LFT_TRGR:
-                Serial.println("core 1 cmd: open top gripper");
+                // Serial.println("core 1 cmd: open top gripper");
                 action = 0;
                 break;
             case BTN_Y + BTN_RGHT_TRGR:
-                Serial.println("core 1 cmd: close top gripper");
+                // Serial.println("core 1 cmd: close top gripper");
                 action = 1;
                 break;
             case BTN_A + BTN_LFT_TRGR:
-                Serial.println("core 1 cmd: open bottom gripper");
+                // Serial.println("core 1 cmd: open bottom gripper");
                 action = 2;
                 break;
             case BTN_A + BTN_RGHT_TRGR:
-                Serial.println("core 1 cmd: close bottom gripper");
+                // Serial.println("core 1 cmd: close bottom gripper");
                 action = 3;
                 break;
             case BTN_B + BTN_LFT_TRGR:
-                Serial.println("core 1 cmd: move rack and pinion up");
+                // Serial.println("core 1 cmd: move rack and pinion up");
                 action = 4;
                 break;
             case BTN_B + BTN_RGHT_TRGR:
-                Serial.println("core 1 cmd: move rack and pinion down");
+                // Serial.println("core 1 cmd: move rack and pinion down");
                 action = 5;
                 break;
             case BTN_X + BTN_LFT_TRGR:
-                Serial.println("core 1 cmd: move robot left");
+                // Serial.println("core 1 cmd: move robot left");
                 action = 6;
                 break;
             case BTN_X + BTN_RGHT_TRGR:
-                Serial.println("core 1 cmd: move robot right");
+                // Serial.println("core 1 cmd: move robot right");
                 action = 7;
                 break;
             case BTN_JYSTK:
-                Serial.println("core 1 cmd: initiate noboru");
+                // Serial.println("core 1 cmd: initiate noboru");
                 action = 8;
                 break;
             case BTN_Y + BTN_JYSTK:
-                Serial.println("core 1 cmd: step up");
+                // Serial.println("core 1 cmd: step up");
                 action = 9;
                 break;
             case BTN_A + BTN_JYSTK:
-                Serial.println("core 1 cmd: step down");
+                // Serial.println("core 1 cmd: step down");
                 action = 10;
                 break;
+            case BTN_B + BTN_JYSTK:
+                // Serial.println("core 1 cmd: big both grab");
+                action = 11;
+                break;
+            case BTN_X + BTN_JYSTK:
+                // Serial.println("core 1 cmd: big both ungrab");
+                action = 12;
+                break;
             default:
-                Serial.println("default in core 1");
+                // Serial.println("default in core 1");
                 action = -1;
                 action_executing = 0;
                 break;
@@ -235,7 +251,6 @@ void processControllers() {
 // Arduino setup function. Runs in CPU 1
 void setup() {
     Serial.begin(115200);
-    //Serial.begin(9600);
     Serial.printf("Firmware: %s\n", BP32.firmwareVersion());
     const uint8_t* addr = BP32.localBdAddress();
     Serial.printf("BD Addr: %2X:%2X:%2X:%2X:%2X:%2X\n", addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
@@ -259,22 +274,19 @@ void setup() {
 
     // Core 0 task to execute the actions with PWM controller
     xTaskCreatePinnedToCore(executeAction, "executeAction", 4096, NULL, 1, &actionTask, 0); 
+
+    // Setup the ultrasonic sensor
+    pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+    pinMode(echoPin, INPUT);  // Sets the echoPin as an Input
 }
 
 // Arduino loop function. Runs in CPU 1.
 void loop() {
-    // This call fetches all the controllers' data.
-    // Call this function in your main loop.
+    // Fetch the data from all controllers connected to the ESP32
     bool dataUpdated = BP32.update();
     if (dataUpdated)
         processControllers();
 
-    // The main loop must have some kind of "yield to lower priority task" event.
-    // Otherwise, the watchdog will get triggered.
-    // If your main loop doesn't have one, just add a simple `vTaskDelay(1)`.
-    // Detailed info here:
-    // https://stackoverflow.com/questions/66278271/task-watchdog-got-triggered-the-tasks-did-not-reset-the-watchdog-in-time
-
-    vTaskDelay(1);
+    vTaskDelay(1); // yield to lower priority task
     delay(150);
 }
