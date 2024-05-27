@@ -145,6 +145,9 @@ void executeAction(void *param) {
                 // Serial.println("big both ungrab in core 0");
                 gripper(BOTH_NUM, ACTION_CLOSE, cooldownms);
                 break;
+            case 13:
+                // Serial.println("climb up in core 0");
+                climb();
             default:
                 // Serial.println("default in core 0");
                 // delay(2000);
@@ -174,6 +177,9 @@ void processGamepad(ControllerPtr ctl) {
         //     buttons_pressed = BTN_X + BTN_RGHT_TRGR;
         // }
         action_executing = 1;
+        if (ctl->axisY() > 200 && buttons_pressed == BTN_Y){
+            buttons_pressed = -2;
+        }
         switch (buttons_pressed) {
             case BTN_Y + BTN_LFT_TRGR:
                 // Serial.println("core 1 cmd: open top gripper");
@@ -226,6 +232,10 @@ void processGamepad(ControllerPtr ctl) {
             case BTN_X + BTN_JYSTK:
                 // Serial.println("core 1 cmd: big both ungrab");
                 action = 12;
+                break;
+            case -2:
+                // Serial.println("core 1 cmd: climb up");
+                action = 13;
                 break;
             default:
                 // Serial.println("default in core 1");
