@@ -4,6 +4,7 @@ lego-technic-axles-1.snapshot.4/
 lego-technic-axles-1.snapshot.4.zip
 *.gcode
 *.stl
+*.png
 Parallax\ Servo\ Cad/
 ardiuno_output/
 arduino_output/
