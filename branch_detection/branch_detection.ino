@@ -20,15 +20,15 @@ void setup() {
 }
 
 void loop() {
-  captureSamples();
+  scan();
 
-  int estimated_period = estimatePeriod();
+  int estimated_period = estimate_period();
   Serial.print("Estimated Period: ");
   Serial.println(estimated_period);
 }
 
 // Obtain distance profile using the ultrasonic sensor. 1000 samples * 50ms delay = 50s for full scan
-void captureSamples() {
+void scan() {
   for (int i = 0; i < samples; ++i) {
     // Clears the trigPin
     digitalWrite(trigPin, LOW);
@@ -51,7 +51,7 @@ void captureSamples() {
 }
 
 // Estimate the period of a scan using the computed samples
-int estimatePeriod() {
+int estimate_period() {
   float dissimilarities[window_max / window_incr];
   float first_window[window_min];
 
